@@ -1,3 +1,9 @@
+// 以下の機能を追加する。
+// 1.現在の着手の部分だけ、ボタンではなく “You are at move #…” というメッセージを表示するようにする。
+// 2.マス目を全部ハードコードするのではなく、Board を 2 つのループを使ってレンダーするよう書き直す。
+// 3.手順を昇順または降順でソートできるトグルボタンを追加する。
+//4.どちらかが勝利したときに、勝利につながった 3 つのマス目をハイライト表示する。引き分けになった場合は、引き分けになったという結果をメッセージに表示する。
+// 5.着手履歴リストで、各着手の場所を (row, col) という形式で表示する。
 "use client";
 
 import { useState } from "react";
@@ -15,9 +21,15 @@ function Square({ value, onSquareClick }: SquareProps) {
   );
 }
 
-function Board({ xIsNext, squares, onPlay }) {
+interface BoardProps {
+  xIsNext: boolean;
+  squares: (string | null)[];
+  onPlay: (nextSquares: (string | null)[]) => void;
+}
+
+function Board({ xIsNext, squares, onPlay }: BoardProps) {
   function handleClick(i: number) {
-    if (squares[i] || calculateWinner(squares)) {
+    if (calculateWinner(squares) || squares[i]) {
       return;
     }
     const nextSquares = squares.slice();
@@ -28,12 +40,13 @@ function Board({ xIsNext, squares, onPlay }) {
     }
     onPlay(nextSquares);
   }
+
   const winner = calculateWinner(squares);
   let status;
   if (winner) {
-    status = "Winner: " + winner;
+    status = `Winner: ${winner}`;
   } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
+    status = `Next player: ${xIsNext ? "X" : "O"}`;
   }
 
   return (
@@ -59,14 +72,34 @@ function Board({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
+  const currentSquares = history[currentMove];
 
-  function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
-    setXIsNext(!xIsNext);
+  function handlePlay(nextSquares: (string | null)[]) {
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
   }
+
+  function jumpTo(nextMove: number) {
+    setCurrentMove(nextMove);
+  }
+
+  const moves = history.map((squares, move) => {
+    let description;
+    if (move > 0) {
+      description = `Go to move #${move}`;
+    } else {
+      description = "Go to game start";
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
 
   return (
     <div className="game">
@@ -74,12 +107,12 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <ol>{/*TODO*/}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   );
 }
-
+// 勝者を判定する関数
 function calculateWinner(squares: (string | null)[]) {
   const lines = [
     [0, 1, 2],
