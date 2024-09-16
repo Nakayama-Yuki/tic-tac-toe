@@ -1,5 +1,4 @@
 // 以下の機能を追加する。
-// 1.現在の着手の部分だけ、ボタンではなく “You are at move #…” というメッセージを表示するようにする。
 // 2.マス目を全部ハードコードするのではなく、Board を 2 つのループを使ってレンダーするよう書き直す。
 // 3.手順を昇順または降順でソートできるトグルボタンを追加する。
 //4.どちらかが勝利したときに、勝利につながった 3 つのマス目をハイライト表示する。引き分けになった場合は、引き分けになったという結果をメッセージに表示する。
@@ -89,14 +88,23 @@ export default function Game() {
 
   const moves = history.map((squares, move) => {
     let description;
-    if (move > 0) {
+    //手順が１以上かつ現在の手順の場合
+    if (move === currentMove && move > 0) {
+      description = `You are at move #${move}`;
+    } else if (move > 0) {
       description = `Go to move #${move}`;
     } else {
-      description = "Go to game start";
+      //初手の場合
+      description = `Go to game start`;
     }
     return (
       <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
+        {/* 手順が１以上かつ現在の手順のときは、文字で表示*/}
+        {move === currentMove && move > 0 ? (
+          <span>{description}</span>
+        ) : (
+          <button onClick={() => jumpTo(move)}>{description}</button>
+        )}
       </li>
     );
   });
