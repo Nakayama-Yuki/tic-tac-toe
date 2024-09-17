@@ -1,5 +1,4 @@
 // 以下の機能を追加する。
-//4.どちらかが勝利したときに、勝利につながった 3 つのマス目をハイライト表示する。引き分けになった場合は、引き分けになったという結果をメッセージに表示する。
 // 5.着手履歴リストで、各着手の場所を (row, col) という形式で表示する。
 "use client";
 
@@ -8,11 +7,14 @@ import { useState } from "react";
 interface SquareProps {
   value: string | null;
   onSquareClick: () => void;
+  isWinningSquare: boolean; // 勝利ラインかどうかを判定するフラグ
 }
 // 小さい四角のコンポーネント
-function Square({ value, onSquareClick }: SquareProps) {
+function Square({ value, onSquareClick, isWinningSquare }: SquareProps) {
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button
+      className={`square ${isWinningSquare ? "highlight" : ""}`} //勝利ラインならハイライト
+      onClick={onSquareClick}>
       {value}
     </button>
   );
@@ -22,9 +24,10 @@ interface BoardProps {
   xIsNext: boolean;
   squares: (string | null)[]; // 空の配列
   onPlay: (nextSquares: (string | null)[]) => void;
+  winningSquares: number[] | null; // 勝利したマス目のインデックス配列
 }
 // Squareを９個集めたボードコンポーネント
-function Board({ xIsNext, squares, onPlay }: BoardProps) {
+function Board({ xIsNext, squares, onPlay, winningSquares }: BoardProps) {
   function handleClick(i: number) {
     if (calculateWinner(squares) || squares[i]) {
       return;
@@ -38,10 +41,13 @@ function Board({ xIsNext, squares, onPlay }: BoardProps) {
     onPlay(nextSquares);
   }
   // 勝者がいるときに、勝者を表示、いないときは次の手順を表示
-  const winner = calculateWinner(squares);
+  const winnerInfo = calculateWinner(squares);
+  const winner = winnerInfo ? winnerInfo.winner : null;
   let status;
   if (winner) {
     status = `Winner: ${winner}`;
+  } else if (squares.every((square) => square !== null)) {
+    status = "引き分け";
   } else {
     status = `Next player: ${xIsNext ? "X" : "O"}`;
   }
@@ -49,7 +55,7 @@ function Board({ xIsNext, squares, onPlay }: BoardProps) {
   return (
     <>
       <div className="status">{status}</div>
-      {/* 3つの行を生成する rowは横、colは縦 */}
+      {/* 3つの行を生成する rowは横、colは縦 JSの要素番号は０からスタート */}
       {Array(3)
         .fill(null)
         .map((_, row) => (
@@ -64,11 +70,14 @@ function Board({ xIsNext, squares, onPlay }: BoardProps) {
                 // 6, 7, 8]
                 // rowが2でcolが1なら、indexは 2 * 3 + 1 = 7 となり、1次元配列の7番目の要素に対応します。
                 const index = row * 3 + col;
+                const isWinningSquare =
+                  winningSquares && winningSquares.includes(index); // 勝利ラインのマス目をハイライト
                 return (
                   <Square
                     key={index}
                     value={squares[index]}
                     onSquareClick={() => handleClick(index)}
+                    isWinningSquare={isWinningSquare || false}
                   />
                 );
               })}
@@ -80,10 +89,10 @@ function Board({ xIsNext, squares, onPlay }: BoardProps) {
 
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const [currentMove, setCurrentMove] = useState(0); //現在の手順
-  const xIsNext = currentMove % 2 === 0;
+  const [currentMove, setCurrentMove] = useState(0); //現在の手番
+  const xIsNext = currentMove % 2 === 0; // 次の手番がXか〇か
   const currentSquares = history[currentMove];
-  const [isAscending, setIsAscending] = useState(true); // ソート順序のステート
+  const [isAscending, setIsAscending] = useState(true); // ソート順序のステート ascending=昇順
 
   function handlePlay(nextSquares: (string | null)[]) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -94,6 +103,9 @@ export default function Game() {
   function jumpTo(nextMove: number) {
     setCurrentMove(nextMove);
   }
+
+  const winnerInfo = calculateWinner(currentSquares);
+  const winningSquares = winnerInfo ? winnerInfo.winningSquares : null;
 
   const moves = history.map((squares, move) => {
     let description;
@@ -126,7 +138,12 @@ export default function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        <Board
+          xIsNext={xIsNext}
+          squares={currentSquares}
+          onPlay={handlePlay}
+          winningSquares={winningSquares}
+        />
       </div>
       <div className="game-info">
         <button onClick={() => setIsAscending(!isAscending)}>
@@ -152,8 +169,8 @@ function calculateWinner(squares: (string | null)[]) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a]; // 勝者のマーク（'X' または 'O'）を返す
+      return { winner: squares[a], winningSquares: [a, b, c] }; // 勝者のマークと勝利ラインを返す
     }
   }
-  return null; // 勝者がいない場合は null を返す
+  return null;
 }
