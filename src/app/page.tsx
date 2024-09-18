@@ -23,7 +23,7 @@ function Square({ value, onSquareClick, isWinningSquare }: SquareProps) {
 interface BoardProps {
   xIsNext: boolean;
   squares: (string | null)[]; // 空の配列
-  onPlay: (nextSquares: (string | null)[]) => void;
+  onPlay: (nextSquares: (string | null)[], i: number) => void;
   winningSquares: number[] | null; // 勝利したマス目のインデックス配列
 }
 // Squareを９個集めたボードコンポーネント
@@ -38,7 +38,7 @@ function Board({ xIsNext, squares, onPlay, winningSquares }: BoardProps) {
     } else {
       nextSquares[i] = "O";
     }
-    onPlay(nextSquares);
+    onPlay(nextSquares, i);
   }
   // 勝者がいるときに、勝者を表示、いないときは次の手順を表示
   const winnerInfo = calculateWinner(squares);
@@ -88,14 +88,26 @@ function Board({ xIsNext, squares, onPlay, winningSquares }: BoardProps) {
 }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  interface Move {
+    squares: (string | null)[];
+    location: { row: number; col: number } | null;
+  }
+
+  const [history, setHistory] = useState<Move[]>([
+    { squares: Array(9).fill(null), location: null },
+  ]);
   const [currentMove, setCurrentMove] = useState(0); //現在の手番
   const xIsNext = currentMove % 2 === 0; // 次の手番がXか〇か
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].squares;
   const [isAscending, setIsAscending] = useState(true); // ソート順序のステート ascending=昇順
 
-  function handlePlay(nextSquares: (string | null)[]) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextSquares: (string | null)[], i: number) {
+    const row = Math.floor(i / 3);
+    const col = i % 3;
+    const nextHistory = [
+      ...history.slice(0, currentMove + 1),
+      { squares: nextSquares, location: { row, col } },
+    ];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -107,25 +119,21 @@ export default function Game() {
   const winnerInfo = calculateWinner(currentSquares);
   const winningSquares = winnerInfo ? winnerInfo.winningSquares : null;
 
-  const moves = history.map((squares, move) => {
+  const moves = history.map((step, move) => {
     let description;
-    //手順が１以上かつ現在の手順のとき
-    if (move === currentMove && move > 0) {
+    if (move === 0) {
+      description = "Go to game start";
+    } else if (move === currentMove) {
       description = `You are at move #${move}`;
-      // 手順が1以上の時
-    } else if (move > 0) {
-      description = `Go to move #${move}`;
-      //初手の場合
     } else {
-      description = `Go to game start`;
+      description = `Go to move #${move} (${step.location?.row}, ${step.location?.col})`;
     }
+
     return (
       <li key={move}>
-        {/* 手順が１以上かつ現在の手順のときは、文字で表示*/}
-        {move === currentMove && move > 0 ? (
+        {move === currentMove ? (
           <span>{description}</span>
         ) : (
-          // それ以外はボタンで表示
           <button onClick={() => jumpTo(move)}>{description}</button>
         )}
       </li>
