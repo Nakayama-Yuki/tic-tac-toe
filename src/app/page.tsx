@@ -121,12 +121,17 @@ export default function Game() {
 
   const moves = history.map((step, move) => {
     let description;
+    //デフォルト値を０に設定
+    // デフォルト値とは、変数が undefined または null の場合に使用される値
+    // JavaScriptでは0スタートだが、表示は1スタートにしたいので、+1する
+    const row = (step.location?.row ?? 0) + 1;
+    const col = (step.location?.col ?? 0) + 1;
     if (move === 0) {
       description = "Go to game start";
     } else if (move === currentMove) {
-      description = `You are at move #${move}`;
+      description = `You are at move #${move} (${row}, ${col})`;
     } else {
-      description = `Go to move #${move} (${step.location?.row}, ${step.location?.col})`;
+      description = `Go to move #${move} (${row}, ${col})`;
     }
 
     return (
