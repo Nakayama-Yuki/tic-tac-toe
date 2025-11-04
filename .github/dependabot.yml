@@ -4,10 +4,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly" # 週次で更新をチェック
-
-    # Pull requestsの制限
-    open-pull-requests-limit: 5
+      interval: "monthly" # 月に１回更新をチェックする
 
     # 特定の更新タイプを無視する設定
     # メジャーアップデートを無効化（破壊的変更の可能性があるため）
