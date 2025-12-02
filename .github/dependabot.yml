@@ -1,10 +1,10 @@
 version: 2
 updates:
-  # npm dependencies (main package.json)
+  # npmパッケージの依存関係を管理
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly" # 月に１回更新をチェックする
+      interval: "weekly" # 週に１回更新をチェックする
 
     # 特定の更新タイプを無視する設定
     # メジャーアップデートを無効化（破壊的変更の可能性があるため）
@@ -13,7 +13,8 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
-    # マイナーおよびパッチアップデートのみを対象
+    # 複数のプルリクを１つにまとめる設定
+    # マイナーおよびパッチ更新をまとめる
     groups:
       minor-and-patch-updates:
         patterns:
