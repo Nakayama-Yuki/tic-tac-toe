@@ -6,19 +6,32 @@ on:
     branches: [main]
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 30 #タイムアウト時間を30分に設定
     runs-on: ubuntu-latest
     steps:
+      # ステップ１: リポジトリのコードを取得
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      # ステップ２: pnpmをインストール
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: lts/*
+          version: 10
+      # ステップ３: Node.jsのセットアップ
+      - name: Use Nodejs LTS
+        uses: actions/setup-node@v6
+        with:
+          node-version: "lts/*"
+          cache: "pnpm"
+      # ステップ４: 依存関係のインストール
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install
+      # ステップ５: Playwrightブラウザのインストール
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
+      # ステップ６: Playwrightテストの実行
       - name: Run Playwright tests
         run: pnpm exec playwright test
+      # ステップ７: Playwrightレポートのアップロード
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
