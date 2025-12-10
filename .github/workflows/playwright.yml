@@ -28,10 +28,13 @@ jobs:
       # ステップ５: Playwrightブラウザのインストール
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
-      # ステップ６: Playwrightテストの実行
+      # ステップ６: nextjsのビルド
+      - name: Build Next.js application
+        run: pnpm build
+      # ステップ７: Playwrightテストの実行
       - name: Run Playwright tests
         run: pnpm exec playwright test
-      # ステップ７: Playwrightレポートのアップロード
+      # ステップ8: Playwrightレポートのアップロード
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
