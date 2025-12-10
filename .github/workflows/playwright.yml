@@ -6,7 +6,7 @@ on:
     branches: [main]
 jobs:
   test:
-    timeout-minutes: 30 #タイムアウト時間を30分に設定
+    timeout-minutes: 30 # タイムアウト時間を30分に設定
     runs-on: ubuntu-latest
     steps:
       # ステップ１: リポジトリのコードを取得
