@@ -178,4 +178,184 @@ test.describe('Tic Tac Toe Game', () => {
       await expect(status).toContainText('Winner: X');
     });
   });
+
+  test('Phase 4: should detect draw when board is full with no winner', async ({ page }) => {
+    await test.step('Fill board to create draw condition', async () => {
+      // X: 0, 1, 5, 6, 7
+      // O: 2, 3, 4, 8
+      // 引き分けのパターン:
+      // X X O
+      // O O X
+      // X X O
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X
+      await squares.nth(2).click(); // O
+      await squares.nth(1).click(); // X
+      await squares.nth(3).click(); // O
+      await squares.nth(5).click(); // X
+      await squares.nth(4).click(); // O
+      await squares.nth(6).click(); // X
+      await squares.nth(8).click(); // O
+      await squares.nth(7).click(); // X - 引き分け
+    });
+
+    await test.step('Verify draw message appears', async () => {
+      const status = page.locator('div.status');
+      await expect(status).toContainText('引き分け');
+    });
+
+    await test.step('Verify no squares are highlighted', async () => {
+      const highlightedSquares = page.locator('button.square.highlight');
+      await expect(highlightedSquares).toHaveCount(0);
+    });
+  });
+
+  test('Phase 5: should display move history', async ({ page }) => {
+    await test.step('Make several moves', async () => {
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X at (1, 1)
+      await squares.nth(4).click(); // O at (2, 2)
+      await squares.nth(8).click(); // X at (3, 3)
+    });
+
+    await test.step('Verify move history is displayed', async () => {
+      // 履歴リスト内のアイテムを確認（ol > li）
+      const historyItems = page.locator('.game-info ol li');
+      
+      // 少なくとも4つのアイテムがあることを確認（start + 3手）
+      await expect(historyItems).toHaveCount(4);
+      
+      // "Go to game start" ボタンが存在
+      const gameStartButton = page.locator('.game-info ol button', { hasText: 'Go to game start' });
+      await expect(gameStartButton).toBeVisible();
+    });
+  });
+
+  test('Phase 5: should jump to previous move using history', async ({ page }) => {
+    await test.step('Make several moves to create history', async () => {
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X at (1, 1)
+      await squares.nth(4).click(); // O at (2, 2)
+      await squares.nth(8).click(); // X at (3, 3)
+    });
+
+    await test.step('Jump to move #1', async () => {
+      // 履歴ボタンから "Go to move #1" をクリック
+      const move1Button = page.locator('.game-info ol button', { hasText: 'Go to move #1' });
+      await move1Button.click();
+    });
+
+    await test.step('Verify board state reverted to move #1', async () => {
+      const squares = page.locator('button.square');
+      
+      // 0番目のマス目にXがある
+      await expect(squares.nth(0)).toHaveText('X');
+      
+      // 4番目と8番目は空
+      await expect(squares.nth(4)).toHaveText('');
+      await expect(squares.nth(8)).toHaveText('');
+      
+      // ステータスはOのターン
+      const status = page.locator('div.status');
+      await expect(status).toContainText('Next player: O');
+    });
+  });
+
+  test('Phase 5: should jump to game start', async ({ page }) => {
+    await test.step('Make several moves', async () => {
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X
+      await squares.nth(1).click(); // O
+      await squares.nth(2).click(); // X
+    });
+
+    await test.step('Click "Go to game start" button', async () => {
+      const gameStartButton = page.locator('.game-info ol button', { hasText: 'Go to game start' });
+      await gameStartButton.click();
+    });
+
+    await test.step('Verify all squares are empty', async () => {
+      const squares = page.locator('button.square');
+      const squareCount = await squares.count();
+      
+      for (let i = 0; i < squareCount; i++) {
+        await expect(squares.nth(i)).toHaveText('');
+      }
+      
+      // ステータスはXのターン
+      const status = page.locator('div.status');
+      await expect(status).toContainText('Next player: X');
+    });
+  });
+
+  test('Phase 5: should allow new moves after jumping to previous state', async ({ page }) => {
+    await test.step('Create initial moves', async () => {
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X
+      await squares.nth(1).click(); // O
+      await squares.nth(2).click(); // X
+    });
+
+    await test.step('Jump to move #1', async () => {
+      const move1Button = page.locator('.game-info ol button', { hasText: 'Go to move #1' });
+      await move1Button.click();
+    });
+
+    await test.step('Make a new move from that state', async () => {
+      const squares = page.locator('button.square');
+      
+      // 4番目のマス目に O を配置（move #1 の後なので O のターン）
+      await squares.nth(4).click();
+      await expect(squares.nth(4)).toHaveText('O');
+      
+      // 元々あった move #2 と #3 は履歴から消える
+      // 新しい履歴は: start, move #1 (X), move #2 (新しい O)
+      const historyItems = page.locator('.game-info ol li');
+      await expect(historyItems).toHaveCount(3);
+    });
+  });
+
+  test('Phase 5: should toggle sort order of move history', async ({ page }) => {
+    await test.step('Make several moves', async () => {
+      const squares = page.locator('button.square');
+      
+      await squares.nth(0).click(); // X
+      await squares.nth(1).click(); // O
+      await squares.nth(2).click(); // X
+    });
+
+    await test.step('Verify initial ascending order', async () => {
+      const historyList = page.locator('.game-info ol li').first();
+      await expect(historyList).toContainText('Go to game start');
+    });
+
+    await test.step('Click sort toggle button', async () => {
+      const sortButton = page.locator('.game-info button', { hasText: '降順にソート' });
+      await sortButton.click();
+    });
+
+    await test.step('Verify descending order', async () => {
+      // 降順の場合、最新の move が最初に来る
+      const firstItem = page.locator('.game-info ol li').first();
+      await expect(firstItem).toContainText('You are at move #3');
+      
+      // ボタンのテキストが変わる
+      const sortButton = page.locator('.game-info button', { hasText: '昇順にソート' });
+      await expect(sortButton).toBeVisible();
+    });
+
+    await test.step('Toggle back to ascending', async () => {
+      const sortButton = page.locator('.game-info button', { hasText: '昇順にソート' });
+      await sortButton.click();
+      
+      // 昇順に戻る
+      const firstItem = page.locator('.game-info ol li').first();
+      await expect(firstItem).toContainText('Go to game start');
+    });
+  });
 });
