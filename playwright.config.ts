@@ -50,14 +50,15 @@ export default defineConfig({
     },
 
     /* モバイルのビューポートでテストする。 */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    {
+      // pixel5と5aは2024年8月26日にサポート終了した
+      name: "Mobile Chrome",
+      use: { ...devices["Pixel 6"] },
+    },
+    {
+      name: "Mobile Safari",
+      use: { ...devices["iPhone 12"] },
+    },
 
     /* 特定のブラウザでテストする */
     // {
