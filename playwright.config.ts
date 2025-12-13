@@ -13,14 +13,14 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests",
-  /* 全てのテストを並行して実行する  スペックの低いpcだとタイムアウトになる*/
-  fullyParallel: false,
+  /* 全てのテストを並行して実行する */
+  fullyParallel: true,
   /* ソースコードにtest.onlyを誤って残した場合、CIでビルドを失敗させる。*/
   forbidOnly: !!process.env.CI,
   /* CIの場合のみリトライする */
   retries: process.env.CI ? 2 : 0,
-  /* CIの場合は並行テストを無効にする */
-  workers: process.env.CI ? 1 : undefined,
+  /* CI環境では並行テストを1個、ローカル環境では2個に設定 */
+  workers: process.env.CI ? 1 : 2,
   /* 使用するレポーター。 See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   /* 直下の全てのプロジェクトで共有される設定。See https://playwright.dev/docs/api/class-testoptions. */
