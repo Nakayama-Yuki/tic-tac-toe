@@ -13,8 +13,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests",
-  /* 全てのテストを並行して実行する */
-  fullyParallel: true,
+  /* 全てのテストを並行して実行する  スペックの低いpcだとタイムアウトになる*/
+  fullyParallel: false,
   /* ソースコードにtest.onlyを誤って残した場合、CIでビルドを失敗させる。*/
   forbidOnly: !!process.env.CI,
   /* CIの場合のみリトライする */
