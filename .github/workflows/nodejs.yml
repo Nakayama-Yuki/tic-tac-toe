@@ -29,6 +29,9 @@ jobs:
       # ステップ４: 依存関係のインストール
       - name: Install dependencies
         run: pnpm install
+      # ステップ４.5: ESLintの実行
+      - name: Run lint
+        run: pnpm lint --max-warnings=0
       # ステップ５: Next.jsビルドキャッシュの設定
       - name: Cache Next.js build
         uses: actions/cache@v5
