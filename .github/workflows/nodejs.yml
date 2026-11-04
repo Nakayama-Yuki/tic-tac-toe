@@ -15,12 +15,12 @@ jobs:
     steps:
       # ステップ１: リポジトリのコードを取得
       - uses: actions/checkout@v7
-      # ステップ２: pnpm、Node.js LTS、依存関係をセットアップ
+      # ステップ２: pnpm、Node.js 24、依存関係をセットアップ
       - name: Setup pnpm and Node.js
         uses: pnpm/setup@v3
         with:
           version: 12
-          runtime: node@lts
+          runtime: node@24
           cache: true
       # ステップ４.5: ESLintの実行
       - name: Run lint
