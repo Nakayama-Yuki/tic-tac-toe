@@ -34,7 +34,7 @@
 
 ```bash
 # リポジトリのクローン
-git clone <repository-url>
+git clone https://github.com/Nakayama-Yuki/tic-tac-toe.git
 cd tic-tac-toe
 
 # 依存関係のインストール
@@ -64,6 +64,9 @@ pnpm start
 ### E2Eテスト（Playwright）
 
 ```bash
+# ブラウザと必要なライブラリを準備
+pnpm exec playwright install --with-deps
+
 # 全テストの実行（ヘッドレスモード）
 pnpm test
 
@@ -80,12 +83,12 @@ pnpm test:debug
 pnpm test:report
 ```
 
-**注意:** テスト実行前に開発サーバー（`pnpm dev`）を起動してください。
+`playwright.config.ts` の `webServer` が `pnpm dev` を起動します。ローカルでは既存サーバーを再利用できます。
 
 ### テストカバレッジ
 
-- 全機能をカバー
-- chromium, firefox, webkit の3ブラウザで並行実行
+- ゲーム操作・履歴・勝利判定などを検証
+- PC向け Chromium / Firefox / WebKit と Mobile Chrome / Mobile Safari の計5プロジェクトで実行
 - 各フェーズの詳細なシナリオテスト
 
 ## プロジェクト構成
@@ -104,13 +107,10 @@ tic-tac-toe/
 │       └── calculateWinner.tsx   # 勝者判定ロジック
 ├── tests/
 │   └── game.spec.ts              # E2Eテスト
-├── .github/
-│   ├── copilot-instructions.md   # Copilot 設定
-│   └── instructions/             # 開発ガイドライン
+├── AGENTS.md                     # AI エージェント向け開発ルール
 ├── playwright.config.ts          # Playwright 設定
 ├── tsconfig.json                 # TypeScript 設定
-├── tailwind.config.ts            # Tailwind CSS 設定
-├── next.config.mjs               # Next.js 設定
+├── next.config.ts               # Next.js 設定
 └── package.json                  # 依存関係・スクリプト
 ```
 
@@ -162,3 +162,7 @@ const [isAscending, setIsAscending] = useState(true);
 - [React 公式チュートリアル](https://react.dev/learn/tutorial-tic-tac-toe)
 - [Next.js ドキュメント](https://nextjs.org/docs)
 - [Playwright ドキュメント](https://playwright.dev/)
+
+## 開発ルール
+
+開発時の指示は [AGENTS.md](AGENTS.md) を参照してください。依存バージョンと実行可能なスクリプトは [package.json](package.json) を正とします。
