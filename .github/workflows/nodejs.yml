@@ -22,6 +22,9 @@ jobs:
           version: 12
           runtime: node@24
           cache: true
+
+      - name: Type check
+        run: pnpm run typecheck
       # ステップ４.5: ESLintの実行
       - name: Run lint
         run: pnpm lint --max-warnings=0
