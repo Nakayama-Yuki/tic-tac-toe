@@ -73,7 +73,7 @@ export default defineConfig({
 
   /* テストを開始する前に開発サーバーを起動する */
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },

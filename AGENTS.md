@@ -81,7 +81,7 @@ pnpm test:report   # テストレポート表示
 
 ### テスト実行時の注意点
 
-- `playwright.config.ts` の `webServer` が `pnpm dev` を起動する。ローカルでは既存サーバーを再利用する
+- `playwright.config.ts` の `webServer` が 事前build後に `pnpm start` を起動する。ローカルでは既存サーバーを再利用する
 - テストは`tests/game.spec.ts`に定義
 - 現在有効な Playwright プロジェクトは PC向け Chromium / Firefox / WebKit と Mobile Chrome / Mobile Safari の計5種。詳細は `playwright.config.ts` を参照
 - ローカルでは2ワーカー、CIでは1ワーカーで実行
