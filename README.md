@@ -186,4 +186,4 @@ pnpm build
 pnpm test:e2e
 ```
 
-ブラウザ未導入の場合は `pnpm exec playwright install --with-deps` を実行してください。ワークフローは [共通CI生成スクリプト](https://github.com/Nakayama-Yuki/calculator/blob/1c00b03232e04a008f1ddeb39e6c7a78deed1127/tools/web-ci/README.md) から生成します。
+ブラウザ未導入の場合は `pnpm exec playwright install --with-deps` を実行してください。ワークフローは [.github/workflows/](.github/workflows/) のYAMLを直接編集します。
