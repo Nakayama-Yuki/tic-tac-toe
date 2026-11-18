@@ -15,7 +15,9 @@
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:e2e": "playwright test",
+    "ci:check": "pnpm typecheck && pnpm lint --max-warnings=0"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -34,5 +36,6 @@
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2"
-  }
+  },
+  "packageManager": "pnpm@12.21.0"
 }
